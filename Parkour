@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parkour Game</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <script>
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 300 },
+                    debug: false
+                }
+            },
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            }
+        };
+
+        const game = new Phaser.Game(config);
+
+        let player;
+        let platforms;
+        let cursors;
+        let goalPlatform;
+        let victoryText;
+
+        function preload() {
+            this.load.image('ground', 'https://labs.phaser.io/assets/sprites/platform.png');
+            this.load.image('player', 'https://labs.phaser.io/assets/sprites/phaser-dude.png');
+        }
+
+        function create() {
+            // Creating platforms
+            platforms = this.physics.add.staticGroup();
+            
+            // 10 platforms at different positions
+            platforms.create(100, 500, 'ground').setScale(0.5).refreshBody();
+            platforms.create(300, 450, 'ground').setScale(0.5).refreshBody();
+            platforms.create(500, 400, 'ground').setScale(0.5).refreshBody();
+            platforms.create(700, 350, 'ground').setScale(0.5).refreshBody();
+            platforms.create(600, 250, 'ground').setScale(0.5).refreshBody();
+            platforms.create(400, 200, 'ground').setScale(0.5).refreshBody();
+            platforms.create(200, 150, 'ground').setScale(0.5).refreshBody();
+            platforms.create(350, 100, 'ground').setScale(0.5).refreshBody();
+            platforms.create(550, 70, 'ground').setScale(0.5).refreshBody();
+            
+            // Final goal platform
+            goalPlatform = platforms.create(750, 50, 'ground').setScale(0.5).refreshBody();
+
+            // Creating the player
+            player = this.physics.add.sprite(100, 450, 'player');
+            player.setBounce(0.2);
+            player.setCollideWorldBounds(true);
+
+            // Collision between player and platforms
+            this.physics.add.collider(player, platforms);
+
+            // Player controls
+            cursors = this.input.keyboard.createCursorKeys();
+
+            // Victory message text (hidden initially)
+            victoryText = this.add.text(400, 300, '', { fontSize: '32px', fill: '#ffffff' });
+            victoryText.setOrigin(0.5);
+        }
+
+        function update() {
+            // Player movement
+            if (cursors.left.isDown) {
+                player.setVelocityX(-160);
+            } else if (cursors.right.isDown) {
+                player.setVelocityX(160);
+            } else {
+                player.setVelocityX(0);
+            }
+
+            if (cursors.up.isDown && player.body.touching.down) {
+                player.setVelocityY(-330);
+            }
+
+            // Check if the player has reached the goal platform
+            if (player.body.touching.down && player.x >= goalPlatform.x - goalPlatform.displayWidth / 2 && player.x <= goalPlatform.x + goalPlatform.displayWidth / 2 && player.y <= goalPlatform.y + 10) {
+                victoryText.setText("Congrats Ghasaq, you won Abbas’s heart. I love you");
+            }
+        }
+    </script>
+</body>
+</html>
